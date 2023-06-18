@@ -14,6 +14,13 @@ class _CreateMessageState extends State<CreateMessage> {
   TextEditingController _message = TextEditingController();
   final Map<String, dynamic> receivers = {};
   @override
+  void dispose() {
+    _phoneNumbers.dispose();
+    _message.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -176,7 +183,7 @@ class _CreateMessageState extends State<CreateMessage> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Name cannot be empty';
+                              return 'Message cannot be empty';
                             }
                             return null;
                           },
@@ -184,7 +191,7 @@ class _CreateMessageState extends State<CreateMessage> {
                       ),
                       IconButton(
                           onPressed: () async {
-                            if (_message.text != '' || receivers != {}) {
+                            if (_phoneNumbers.text != '' || receivers != {}) {
                               bool result = false;
                               Set recipients = {};
                               recipients.addAll(receivers.keys.toList());

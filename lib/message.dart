@@ -15,40 +15,38 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   List<SmsMessage> _messages = [];
   List<SmsMessage> _senderMessages = [];
-
+  String? PhoneNumber;
+  TextEditingController _message = TextEditingController();
+  _MessageScreenState({this.PhoneNumber});
   @override
   void initState() {
     super.initState();
     getAllSms();
   }
 
+  @override
+  void dispose() {
+    _message.dispose();
+    super.dispose();
+  }
+
   Future<void> getAllSms() async {
     List<SmsMessage> messages = [];
-    List<SmsMessage> receiverMessages = [];
-    List<SmsMessage> senderMessages = [];
     List<SmsMessage> sentMessages = await SmsQuery().querySms(
       address: PhoneNumber,
       kinds: [SmsQueryKind.sent],
     );
     final receivedMessages = await SmsQuery().querySms(address: PhoneNumber);
-    for (var message in receivedMessages) {
+    for (var message in [...receivedMessages, ...sentMessages]) {
       messages.add(message);
-      receiverMessages.add(message);
     }
-    for (var message in sentMessages) {
-      messages.add(message);
-      senderMessages.add(message);
-    }
-    _senderMessages = senderMessages;
+    _senderMessages = sentMessages;
     messages.sort((a, b) => a.date!.compareTo(b.date!));
     setState(() {
       _messages = messages;
     });
   }
 
-  String? PhoneNumber;
-  TextEditingController _message = TextEditingController();
-  _MessageScreenState({this.PhoneNumber});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
