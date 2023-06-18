@@ -3,17 +3,17 @@ import 'package:flutter_sms/flutter_sms.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 
 class MessageScreen extends StatefulWidget {
-  String? PhoneNumber;
-  MessageScreen({super.key, this.PhoneNumber});
+  final String? phoneNumber;
+  const MessageScreen({super.key, this.phoneNumber});
 
   @override
   State<MessageScreen> createState() =>
-      _MessageScreenState(PhoneNumber: PhoneNumber);
+      // ignore: no_logic_in_create_state
+      _MessageScreenState(PhoneNumber: phoneNumber);
 }
 
 class _MessageScreenState extends State<MessageScreen> {
   List<SmsMessage> _messages = [];
-  List<SmsMessage> _receiverMessages = [];
   List<SmsMessage> _senderMessages = [];
 
   @override
@@ -40,7 +40,6 @@ class _MessageScreenState extends State<MessageScreen> {
       senderMessages.add(message);
     }
     _senderMessages = senderMessages;
-    _receiverMessages = receiverMessages;
     messages.sort((a, b) => a.date!.compareTo(b.date!));
     setState(() {
       _messages = messages;
@@ -55,12 +54,12 @@ class _MessageScreenState extends State<MessageScreen> {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_sharp),
+            icon: const Icon(Icons.arrow_back_sharp),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
             PhoneNumber!,
-            style: TextStyle(
+            style: const TextStyle(
                 fontFamily: "Lato",
                 fontSize: 26.0,
                 color: Colors.black,
@@ -79,26 +78,27 @@ class _MessageScreenState extends State<MessageScreen> {
                     isMe = true;
                   }
                   return Container(
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                     child: Row(
                       mainAxisAlignment: isMe
                           ? MainAxisAlignment.end
                           : MainAxisAlignment.start,
                       children: [
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
                             color: isMe ? Colors.grey[300] : Colors.blue[400],
                             borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              topRight: Radius.circular(20),
+                              topLeft: const Radius.circular(20),
+                              topRight: const Radius.circular(20),
                               bottomLeft: isMe
-                                  ? Radius.circular(20)
-                                  : Radius.circular(0),
+                                  ? const Radius.circular(20)
+                                  : const Radius.circular(0),
                               bottomRight: isMe
-                                  ? Radius.circular(0)
-                                  : Radius.circular(20),
+                                  ? const Radius.circular(0)
+                                  : const Radius.circular(20),
                             ),
                           ),
                           child: SizedBox(
@@ -130,36 +130,36 @@ class _MessageScreenState extends State<MessageScreen> {
                       isDense: true,
                       hintText: 'Message',
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           width: 1,
                         ),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0x00000000),
                           width: 1,
                         ),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0x00000000),
                           width: 1,
                         ),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       focusedErrorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0x00000000),
                           width: 1,
                         ),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       filled: true,
-                      fillColor: Color(0x7FFFFFFF),
+                      fillColor: const Color(0x7FFFFFFF),
                       contentPadding:
-                          EdgeInsetsDirectional.fromSTEB(14, 16, 24, 16),
+                          const EdgeInsetsDirectional.fromSTEB(14, 16, 24, 16),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -170,22 +170,33 @@ class _MessageScreenState extends State<MessageScreen> {
                   ),
                 ),
                 IconButton(
-                    onPressed: () {
-                      sendSMS(
+                    onPressed: () async {
+                      bool result = false;
+                      await sendSMS(
                           sendDirect: true,
                           message: _message.text,
                           recipients: [PhoneNumber!]).catchError((onError) {
-                        print(onError);
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text("Message is not sent"),
+                          duration: Duration(seconds: 1),
+                        ));
                         return Future.error(onError);
                       }).then((value) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        result = true;
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
                           content: Text("Message is sent"),
                           duration: Duration(seconds: 1),
                         ));
-                        Navigator.pop(context);
                       });
+                      if (result) {
+                        Future.delayed(const Duration(seconds: 2), () {
+                          Navigator.pop(context);
+                        });
+                      }
                     },
-                    icon: Icon(Icons.send))
+                    icon: const Icon(Icons.send))
               ],
             )
           ],

@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:sms_app/message.dart';
 import 'createMessage.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:flutter_sms/flutter_sms.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,7 +24,6 @@ class _HomePageState extends State<HomePage> {
     final status = await Permission.sms.request();
     if (status.isGranted) {
       List<SmsMessage> messages = await SmsQuery().getAllSms;
-      print(messages[0].body);
       setState(() {
         _messages = messages;
       });
@@ -38,7 +36,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
           backgroundColor: Colors.white,
           centerTitle: true,
-          title: Text(
+          title: const Text(
             "Messages",
             style: TextStyle(
                 fontFamily: "Lato",
@@ -47,11 +45,12 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.w500),
           )),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => CreateMessage()));
+        onPressed: () async {
+          final _ = await Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const CreateMessage()));
+          await getAllSms();
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         backgroundColor: Colors.blue,
       ),
       body: ListView.separated(
@@ -59,7 +58,7 @@ class _HomePageState extends State<HomePage> {
         itemCount: _messages.length,
         itemBuilder: (context, index) {
           return ListTile(
-            leading: CircleAvatar(
+            leading: const CircleAvatar(
               backgroundColor: Colors.black12,
               backgroundImage: AssetImage("assets/images/user.jpg"),
               radius: 20,
@@ -67,33 +66,20 @@ class _HomePageState extends State<HomePage> {
             title: Text(_messages[index].sender!),
             subtitle: Text(_messages[index].body!, maxLines: 2),
             onTap: () async {
-              // List<SmsMessage> sentMessages = await SmsQuery().querySms(
-              //   address: _messages[index].sender,
-              //   kinds: [SmsQueryKind.sent],
-              // );
-              // final receivedMessages =
-              //     await SmsQuery().querySms(address: _messages[index].sender!);
-              // for (var message in receivedMessages) {
-              //   print(message.sender);
-              //   print(message.body);
-              // }
-              // for (var message in sentMessages) {
-              //   print(message.sender);
-              //   print(message.body);
-              // }
-              Navigator.push(
+              final _ = await Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => MessageScreen(
-                            PhoneNumber: _messages[index].sender,
+                            phoneNumber: _messages[index].sender,
                           )));
+              await getAllSms();
             },
             trailing: Column(
               children: [
-                Text("${DateFormat('E MMM y').format(_messages[index].date!)}",
-                    style: TextStyle(fontSize: 11.0)),
-                Text("${DateFormat('h:mm a').format(_messages[index].date!)}",
-                    style: TextStyle(fontSize: 11.0)),
+                Text(DateFormat('E MMM y').format(_messages[index].date!),
+                    style: const TextStyle(fontSize: 11.0)),
+                Text(DateFormat('h:mm a').format(_messages[index].date!),
+                    style: const TextStyle(fontSize: 11.0)),
               ],
             ),
           );

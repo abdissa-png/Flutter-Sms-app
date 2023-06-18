@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:flutter_sms/flutter_sms.dart';
-import 'homepage.dart';
 
 class CreateMessage extends StatefulWidget {
   const CreateMessage({Key? key}) : super(key: key);
@@ -19,12 +18,12 @@ class _CreateMessageState extends State<CreateMessage> {
     return Scaffold(
       appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_sharp),
+            icon: const Icon(Icons.arrow_back_sharp),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
-          title: Text(
+          title: const Text(
             "Write Message",
             style: TextStyle(
                 fontFamily: "Lato",
@@ -32,163 +31,201 @@ class _CreateMessageState extends State<CreateMessage> {
                 color: Colors.black,
                 fontWeight: FontWeight.w500),
           )),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+      body: LayoutBuilder(builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
+              maxHeight: double.infinity,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      maxLines: null,
-                      controller: _phoneNumbers,
-                      autofocus: true,
-                      textCapitalization: TextCapitalization.sentences,
-                      obscureText: false,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        hintText: 'Phone Number',
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 1,
-                            color: Color(0x00000000),
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0x00000000),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0x00000000),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        filled: true,
-                        fillColor: Color(0x7FFFFFFF),
-                        contentPadding:
-                            EdgeInsetsDirectional.fromSTEB(14, 16, 24, 16),
+                  Column(
+                    children: [
+                      Wrap(
+                        spacing: 8.0,
+                        children: receivers.keys.map((number) {
+                          return InputChip(
+                            label: Text('${receivers[number]}'),
+                            onDeleted: () {
+                              setState(() {
+                                receivers.remove(number);
+                              });
+                            },
+                          );
+                        }).toList(),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Name cannot be empty';
-                        }
-                        return null;
-                      },
-                    ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              maxLines: null,
+                              controller: _phoneNumbers,
+                              autofocus: true,
+                              textCapitalization: TextCapitalization.sentences,
+                              obscureText: false,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                hintText: 'Phone Number',
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    width: 1,
+                                    color: Color(0x00000000),
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    width: 1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Color(0x00000000),
+                                    width: 1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Color(0x00000000),
+                                    width: 1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                filled: true,
+                                fillColor: const Color(0x7FFFFFFF),
+                                contentPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        14, 16, 24, 16),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Name cannot be empty';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          IconButton(
+                              onPressed: () async {
+                                final PhoneContact contact =
+                                    await FlutterContactPicker
+                                        .pickPhoneContact();
+                                final number = contact.phoneNumber?.number;
+                                final name = contact.fullName;
+                                if (number != Null) {
+                                  setState(() {
+                                    receivers[number!] = name;
+                                  });
+                                }
+                              },
+                              icon: const Icon(Icons.add))
+                        ],
+                      ),
+                    ],
                   ),
-                  IconButton(
-                      onPressed: () async {
-                        final PhoneContact contact =
-                            await FlutterContactPicker.pickPhoneContact();
-                        final number = contact.phoneNumber?.number;
-                        final name = contact.fullName;
-                        if (number != Null) {
-                          // print(contact.phoneNumber?.number);
-                          receivers[number!] = name;
-                          setState(() {
-                            _phoneNumbers.text = "";
-                            for (var key in receivers.keys) {
-                              _phoneNumbers.text +=
-                                  "${receivers[key]}:   $key\n";
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          maxLines: null,
+                          controller: _message,
+                          autofocus: true,
+                          textCapitalization: TextCapitalization.sentences,
+                          obscureText: false,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            hintText: 'Message',
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Color(0x00000000),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Color(0x00000000),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Color(0x00000000),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            filled: true,
+                            fillColor: const Color(0x7FFFFFFF),
+                            contentPadding:
+                                const EdgeInsetsDirectional.fromSTEB(
+                                    14, 16, 24, 16),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Name cannot be empty';
                             }
-                          });
-                        }
-                      },
-                      icon: Icon(Icons.add))
-                ],
-              ),
-              SizedBox(
-                height: 500,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      maxLines: null,
-                      controller: _message,
-                      autofocus: true,
-                      textCapitalization: TextCapitalization.sentences,
-                      obscureText: false,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        hintText: 'Message',
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0x00000000),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
+                            return null;
+                          },
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0x00000000),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0x00000000),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        filled: true,
-                        fillColor: Color(0x7FFFFFFF),
-                        contentPadding:
-                            EdgeInsetsDirectional.fromSTEB(14, 16, 24, 16),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Name cannot be empty';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        sendSMS(
-                                sendDirect: true,
-                                message: _message.text,
-                                recipients: receivers.keys.toList())
-                            .catchError((onError) {
-                          return Future.error(onError.toString());
-                        }).then((value) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Message is sent"),
-                            duration: Duration(seconds: 1),
-                          ));
-                          Navigator.pop(context);
-                        });
-                      },
-                      icon: Icon(Icons.send))
+                      IconButton(
+                          onPressed: () async {
+                            if (_message.text != '' || receivers != {}) {
+                              bool result = false;
+                              Set recipients = {};
+                              recipients.addAll(receivers.keys.toList());
+                              _phoneNumbers.text != ""
+                                  ? recipients.add(_phoneNumbers.text)
+                                  : null;
+                              await sendSMS(
+                                      sendDirect: true,
+                                      message: _message.text,
+                                      recipients: List.from(recipients))
+                                  .catchError((onError) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text("Message is not sent"),
+                                  duration: Duration(seconds: 1),
+                                ));
+                                return Future.error(onError.toString());
+                              }).then((value) {
+                                result = true;
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text("Message is sent"),
+                                  duration: Duration(seconds: 1),
+                                ));
+                              });
+                              if (result) {
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  Navigator.pop(context);
+                                });
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.send))
+                    ],
+                  )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
