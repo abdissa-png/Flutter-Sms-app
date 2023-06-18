@@ -1,4 +1,4 @@
-# SMS APP
+# GROUP 15 SMS APP
 
 ## Group Members
 |Name|ID|Section|
